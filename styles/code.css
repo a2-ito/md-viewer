@@ -1,0 +1,57 @@
+/* ---- Shiki（明暗テーマを CSS 変数で切り替える） ---- */
+
+.markdown-body .shiki {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+.markdown-body .shiki span { color: var(--shiki-light); }
+
+@media (prefers-color-scheme: dark) {
+  .markdown-body .shiki {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+  .markdown-body .shiki span { color: var(--shiki-dark); }
+}
+
+/*
+ * shiki は行を <span class="line"> で包み、その間に実際の改行文字を置く。
+ * .line を block にすると改行と二重になって行間が倍になるため、pre の
+ * white-space に任せる。
+ */
+.markdown-body .shiki code {
+  display: block;
+  width: fit-content;
+  min-width: 100%;
+}
+
+/* ---- mermaid ---- */
+
+.markdown-body pre.mermaid {
+  padding: 8px 0;
+  overflow-x: auto;
+  text-align: center;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.markdown-body pre.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---- KaTeX ---- */
+
+/* 長い数式は数式ブロック内で横スクロールさせ、本文を広げない */
+.markdown-body .katex-display {
+  padding: 4px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* 構文エラー箇所は KaTeX が色付けする。地の色と衝突しないよう明示する */
+.markdown-body .katex-error {
+  color: var(--error-border);
+  font-family: var(--font-mono);
+}

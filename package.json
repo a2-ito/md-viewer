@@ -1,0 +1,52 @@
+{
+  "name": "md-viewer",
+  "version": "0.1.0",
+  "description": "ローカルの Markdown をブラウザで快適に閲覧する CLI ビューワ",
+  "type": "module",
+  "bin": {
+    "md-viewer": "./dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json && node dist/cli/index.js",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "test": "node --test 'test/**/*.test.ts'"
+  },
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "@vscode/markdown-it-katex": "^1.1.2",
+    "chokidar": "^5.0.0",
+    "commander": "^15.0.0",
+    "hono": "^4.13.3",
+    "js-yaml": "^5.3.0",
+    "katex": "^0.18.4",
+    "markdown-it": "^15.0.0",
+    "mermaid": "^11.16.1",
+    "shiki": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a2-ito/md-viewer.git"
+  },
+  "keywords": [
+    "markdown",
+    "viewer",
+    "cli",
+    "mermaid",
+    "katex"
+  ]
+}

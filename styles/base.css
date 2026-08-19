@@ -1,0 +1,213 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --fg-muted: #59636e;
+  --border: #d1d9e0;
+  --accent: #0969da;
+  --code-bg: #f6f8fa;
+  --notice-bg: #fff8c5;
+  --notice-border: #d4a72c;
+  --error-bg: #ffebe9;
+  --error-border: #cf222e;
+  --header-h: 48px;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --fg-muted: #9198a1;
+    --border: #3d444d;
+    --accent: #4493f8;
+    --code-bg: #151b23;
+    --notice-bg: #282215;
+    --notice-border: #9e6a03;
+    --error-bg: #25171c;
+    --error-border: #f85149;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  line-height: 1.7;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--header-h);
+  padding: 0 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-name { font-weight: 600; font-size: 14px; }
+.app-path { color: var(--fg-muted); font-size: 13px; font-family: var(--font-mono); }
+.app-print {
+  margin-left: auto;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.app-print:hover { background: var(--code-bg); }
+
+.notice {
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  background: var(--notice-bg);
+  border: 1px solid var(--notice-border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+.notice-error { background: var(--error-bg); border-color: var(--error-border); }
+
+pre.raw {
+  padding: 16px;
+  overflow-x: auto;
+  background: var(--code-bg);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ---- レイアウト（サイドバー + 本文） ---- */
+
+.app-body {
+  display: flex;
+  align-items: flex-start;
+}
+
+.tree-pane {
+  position: sticky;
+  top: var(--header-h);
+  flex: 0 0 240px;
+  height: calc(100vh - var(--header-h));
+  padding: 16px 8px 32px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.tree-pane .markdown-body { padding: 0; }
+
+.app-body > .markdown-body { flex: 1 1 auto; min-width: 0; }
+
+/* ---- ファイルツリー ---- */
+
+.tree {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tree .tree { padding-left: 14px; }
+
+.tree-dir > details > summary {
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tree-dir > details > summary:hover { background: var(--code-bg); color: var(--fg); }
+.tree-dir > details > summary::marker { color: var(--fg-muted); }
+
+.tree-file {
+  display: block;
+  padding: 3px 6px;
+  overflow: hidden;
+  color: var(--fg);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 6px;
+}
+.tree-file:hover { background: var(--code-bg); }
+.tree-file.is-current {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 画面が狭いときはツリーを本文の上に積む */
+@media (max-width: 900px) {
+  .app-body { display: block; }
+  .tree-pane {
+    position: static;
+    height: auto;
+    max-height: 40vh;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+/* ---- 目次ペイン ---- */
+
+.toc-pane {
+  position: sticky;
+  top: var(--header-h);
+  flex: 0 0 220px;
+  height: calc(100vh - var(--header-h));
+  padding: 16px 12px 32px;
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.toc-heading {
+  margin-bottom: 8px;
+  padding-left: 10px;
+  color: var(--fg-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+
+.toc {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc .toc { padding-left: 12px; }
+
+.toc a {
+  display: block;
+  padding: 3px 8px;
+  overflow: hidden;
+  color: var(--fg-muted);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-left: 2px solid transparent;
+}
+.toc a:hover { color: var(--fg); }
+
+.toc a.is-current {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+.toc-l3 > a { font-size: 12px; }
+
+/* 目次は本文より優先度が低いので、狭い画面では落とす */
+@media (max-width: 1200px) {
+  .toc-pane { display: none; }
+}
