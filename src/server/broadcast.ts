@@ -1,4 +1,4 @@
-import type { ChangeEvent } from '../fs/watcher.ts';
+import type { ChangeEvent } from "../fs/watcher.ts";
 
 export type Subscriber = (event: ChangeEvent) => void;
 

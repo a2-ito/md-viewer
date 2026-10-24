@@ -1,9 +1,12 @@
-import { escapeHtml } from '../core/escape.ts';
-import type { TocEntry } from '../core/toc.ts';
-import type { FileNode } from '../fs/tree.ts';
+import { escapeHtml } from "../core/escape.ts";
+import type { TocEntry } from "../core/toc.ts";
+import type { FileNode } from "../fs/tree.ts";
 
 /** 現在表示中のファイルがこのディレクトリ配下にあるか（=開いた状態にする） */
-const containsCurrent = (dirRelPath: string, currentRelPath: string | null): boolean =>
+const containsCurrent = (
+  dirRelPath: string,
+  currentRelPath: string | null,
+): boolean =>
   currentRelPath !== null && currentRelPath.startsWith(`${dirRelPath}/`);
 
 /** ファイル 1 件を指すリンク先を組み立てる */
@@ -23,14 +26,16 @@ export const renderTree = (
 ): string =>
   `<ul class="tree">${nodes
     .map((node) => {
-      if (node.kind === 'dir') {
-        const open = containsCurrent(node.relPath, currentRelPath) ? ' open' : '';
+      if (node.kind === "dir") {
+        const open = containsCurrent(node.relPath, currentRelPath)
+          ? " open"
+          : "";
         return `<li class="tree-dir"><details${open} data-path="${escapeHtml(node.relPath)}"><summary>${escapeHtml(node.name)}</summary>${renderTree(node.children, currentRelPath, hrefFor)}</details></li>`;
       }
-      const current = node.relPath === currentRelPath ? ' is-current' : '';
+      const current = node.relPath === currentRelPath ? " is-current" : "";
       return `<li class="tree-item"><a class="tree-file${current}" href="${hrefFor(node.relPath)}">${escapeHtml(node.name)}</a></li>`;
     })
-    .join('')}</ul>`;
+    .join("")}</ul>`;
 
 /** 目次を描画する。リンクはネイティブのアンカー遷移に任せる。 */
 export const renderToc = (entries: readonly TocEntry[]): string =>
@@ -38,10 +43,10 @@ export const renderToc = (entries: readonly TocEntry[]): string =>
     .map(
       (entry) =>
         `<li class="toc-item toc-l${entry.level}"><a href="#${encodeURIComponent(entry.slug)}">${escapeHtml(entry.text)}</a>${
-          entry.children.length > 0 ? renderToc(entry.children) : ''
+          entry.children.length > 0 ? renderToc(entry.children) : ""
         }</li>`,
     )
-    .join('')}</ul>`;
+    .join("")}</ul>`;
 
 export type LayoutInput = {
   readonly title: string;
@@ -74,12 +79,12 @@ export const renderLayout = ({
 }: LayoutInput): string => {
   const sidebar =
     tree === null
-      ? ''
+      ? ""
       : `<nav class="tree-pane" aria-label="ファイルツリー">${renderTree(tree, currentRelPath)}</nav>`;
 
   const tocPane =
     toc.length === 0
-      ? ''
+      ? ""
       : `<aside class="toc-pane" aria-label="目次"><div class="toc-heading">ON THIS PAGE</div>${renderToc(toc)}</aside>`;
 
   return `<!doctype html>
@@ -89,8 +94,8 @@ export const renderLayout = ({
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <link rel="stylesheet" href="/__static/app.css">
-${hasMath ? '<link rel="stylesheet" href="/__static/katex.css">\n' : ''}</head>
-<body${tree === null ? ' class="no-sidebar"' : ''}>
+${hasMath ? '<link rel="stylesheet" href="/__static/katex.css">\n' : ""}</head>
+<body${tree === null ? ' class="no-sidebar"' : ""}>
 <header class="app-header">
   <span class="app-name">md-viewer</span>
   <span class="app-path">${escapeHtml(breadcrumb)}</span>
@@ -99,7 +104,7 @@ ${hasMath ? '<link rel="stylesheet" href="/__static/katex.css">\n' : ''}</head>
 <div class="app-body">
 ${sidebar}
 <main class="markdown-body">
-${warnings.map((w) => `<div class="notice notice-error">${escapeHtml(w)}</div>`).join('\n')}
+${warnings.map((w) => `<div class="notice notice-error">${escapeHtml(w)}</div>`).join("\n")}
 ${body}
 </main>
 ${tocPane}
@@ -122,8 +127,8 @@ export type ErrorPageInput = {
 
 export const renderErrorPage = ({ message, tree }: ErrorPageInput): string =>
   renderLayout({
-    title: 'エラー - md-viewer',
-    breadcrumb: '',
+    title: "エラー - md-viewer",
+    breadcrumb: "",
     tree,
     currentRelPath: null,
     body: `<div class="notice notice-error">${escapeHtml(message)}</div>`,

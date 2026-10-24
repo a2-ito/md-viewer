@@ -1,13 +1,13 @@
-import { readFile } from 'node:fs/promises';
-import { basename, extname, join, posix } from 'node:path';
-import { Hono } from 'hono';
-import type { Context } from 'hono';
-import { streamSSE } from 'hono/streaming';
-import { splitHash } from '../core/links.ts';
-import { createRenderer } from '../core/renderer.ts';
-import { DEFAULT_MAX_BYTES, resolveWithinRoot } from '../fs/resolve.ts';
-import { buildTree, isMarkdownPath } from '../fs/tree.ts';
-import type { Broadcaster } from './broadcast.ts';
+import { readFile } from "node:fs/promises";
+import { basename, extname, join, posix } from "node:path";
+import { Hono } from "hono";
+import type { Context } from "hono";
+import { streamSSE } from "hono/streaming";
+import { splitHash } from "../core/links.ts";
+import { createRenderer } from "../core/renderer.ts";
+import { DEFAULT_MAX_BYTES, resolveWithinRoot } from "../fs/resolve.ts";
+import { buildTree, isMarkdownPath } from "../fs/tree.ts";
+import type { Broadcaster } from "./broadcast.ts";
 import {
   CLIENT_DIR,
   KATEX_CSS,
@@ -15,34 +15,38 @@ import {
   MERMAID_JS,
   STYLES_DIR,
   STYLE_FILES,
-} from '../paths.ts';
-import type { FenceHighlighter } from './highlight.ts';
-import { renderErrorPage, renderLayout, renderRawFallback } from '../view/layout.ts';
+} from "../paths.ts";
+import type { FenceHighlighter } from "./highlight.ts";
+import {
+  renderErrorPage,
+  renderLayout,
+  renderRawFallback,
+} from "../view/layout.ts";
 
 /** DNS rebinding 対策として許可する Host（DESIGN §8） */
-const ALLOWED_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+const ALLOWED_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 const CONTENT_TYPES: Readonly<Record<string, string>> = {
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
-  '.webp': 'image/webp',
-  '.avif': 'image/avif',
-  '.svg': 'image/svg+xml',
-  '.pdf': 'application/pdf',
-  '.txt': 'text/plain; charset=utf-8',
-  '.csv': 'text/csv; charset=utf-8',
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".avif": "image/avif",
+  ".svg": "image/svg+xml",
+  ".pdf": "application/pdf",
+  ".txt": "text/plain; charset=utf-8",
+  ".csv": "text/csv; charset=utf-8",
 };
 
 const FONT_TYPES: Readonly<Record<string, string>> = {
-  '.woff2': 'font/woff2',
-  '.woff': 'font/woff',
-  '.ttf': 'font/ttf',
+  ".woff2": "font/woff2",
+  ".woff": "font/woff",
+  ".ttf": "font/ttf",
 };
 
 /** node_modules 由来の不変アセットに付けるキャッシュ指示 */
-const IMMUTABLE_CACHE = 'public, max-age=86400';
+const IMMUTABLE_CACHE = "public, max-age=86400";
 
 export type AppOptions = {
   /** 公開ルート。この外へのアクセスは拒否される */
@@ -63,21 +67,21 @@ export type AppOptions = {
  */
 export const createLinkRewriters = (relPath: string) => {
   const dir = posix.dirname(relPath);
-  const base = dir === '.' ? '' : dir;
+  const base = dir === "." ? "" : dir;
 
   /** root 相対パスへ正規化する。root 外に出るものは null */
   const toRootRel = (target: string): string | null => {
     const joined = posix.normalize(posix.join(base, target));
-    return joined.startsWith('..') ? null : joined;
+    return joined.startsWith("..") ? null : joined;
   };
 
   return {
     rewriteHref: (href: string): string => {
       const [path, hash] = splitHash(href);
-      if (path === '') return href;
+      if (path === "") return href;
       const rel = toRootRel(path);
       if (rel === null) return href;
-      const prefix = isMarkdownPath(rel) ? '/view/' : '/assets/';
+      const prefix = isMarkdownPath(rel) ? "/view/" : "/assets/";
       return `${prefix}${encodeURI(rel)}${hash}`;
     },
     rewriteSrc: (src: string): string => {
@@ -99,9 +103,9 @@ const serveFile = async (
     return c.text(`Not Found: ${basename(absPath)}`, 404);
   }
   return c.body(new Uint8Array(data), 200, {
-    'content-type': contentType,
-    'x-content-type-options': 'nosniff',
-    ...(cacheControl === undefined ? {} : { 'cache-control': cacheControl }),
+    "content-type": contentType,
+    "x-content-type-options": "nosniff",
+    ...(cacheControl === undefined ? {} : { "cache-control": cacheControl }),
   });
 };
 
@@ -112,71 +116,82 @@ export const createApp = (options: AppOptions): Hono => {
   const app = new Hono();
 
   // Host ヘッダを localhost 系に限定する
-  app.use('*', async (c, next) => {
-    const host = c.req.header('host')?.split(':')[0] ?? '';
+  app.use("*", async (c, next) => {
+    const host = c.req.header("host")?.split(":")[0] ?? "";
     if (!ALLOWED_HOSTS.has(host)) {
-      return c.text('Forbidden: unexpected Host header', 403);
+      return c.text("Forbidden: unexpected Host header", 403);
     }
     await next();
   });
 
   // ---- 静的アセット ----
 
-  app.get('/__static/app.css', async (c) => {
+  app.get("/__static/app.css", async (c) => {
     const parts = await Promise.all(
-      STYLE_FILES.map((name) => readFile(join(STYLES_DIR, name), 'utf8')),
+      STYLE_FILES.map((name) => readFile(join(STYLES_DIR, name), "utf8")),
     );
-    return c.body(parts.join('\n'), 200, {
-      'content-type': 'text/css; charset=utf-8',
-      'cache-control': 'no-cache',
+    return c.body(parts.join("\n"), 200, {
+      "content-type": "text/css; charset=utf-8",
+      "cache-control": "no-cache",
     });
   });
 
   // クライアントスクリプトは ESM のまま複数ファイルで配信する
-  app.get('/__static/js/:file', async (c) => {
-    const file = basename(c.req.param('file'));
+  app.get("/__static/js/:file", async (c) => {
+    const file = basename(c.req.param("file"));
     if (!/^[a-z]+\.js$/.test(file)) {
-      return c.text('Not Found', 404);
+      return c.text("Not Found", 404);
     }
     return await serveFile(
-      c, join(CLIENT_DIR, file), 'text/javascript; charset=utf-8', 'no-cache',
+      c,
+      join(CLIENT_DIR, file),
+      "text/javascript; charset=utf-8",
+      "no-cache",
     );
   });
 
-  app.get('/__static/katex.css', (c) =>
-    serveFile(c, KATEX_CSS, 'text/css; charset=utf-8', IMMUTABLE_CACHE),
+  app.get("/__static/katex.css", (c) =>
+    serveFile(c, KATEX_CSS, "text/css; charset=utf-8", IMMUTABLE_CACHE),
   );
 
-  app.get('/__static/mermaid.js', (c) =>
-    serveFile(c, MERMAID_JS, 'text/javascript; charset=utf-8', IMMUTABLE_CACHE),
+  app.get("/__static/mermaid.js", (c) =>
+    serveFile(c, MERMAID_JS, "text/javascript; charset=utf-8", IMMUTABLE_CACHE),
   );
 
   // KaTeX の CSS が fonts/ を相対参照するため、同じ階層に置く
-  app.get('/__static/fonts/:file', async (c) => {
-    const file = basename(c.req.param('file'));
+  app.get("/__static/fonts/:file", async (c) => {
+    const file = basename(c.req.param("file"));
     const type = FONT_TYPES[extname(file).toLowerCase()];
     // KaTeX のフォント以外は返さない
-    if (type === undefined || !/^KaTeX_[A-Za-z0-9-]+\.(woff2|woff|ttf)$/.test(file)) {
-      return c.text('Not Found', 404);
+    if (
+      type === undefined ||
+      !/^KaTeX_[A-Za-z0-9-]+\.(woff2|woff|ttf)$/.test(file)
+    ) {
+      return c.text("Not Found", 404);
     }
-    return await serveFile(c, join(KATEX_FONTS_DIR, file), type, IMMUTABLE_CACHE);
+    return await serveFile(
+      c,
+      join(KATEX_FONTS_DIR, file),
+      type,
+      IMMUTABLE_CACHE,
+    );
   });
 
   // ---- API ----
 
-  app.get('/api/tree', async (c) => c.json(await buildTree(options.root)));
+  app.get("/api/tree", async (c) => c.json(await buildTree(options.root)));
 
   // ファイル変更を配る。EventSource 側が切断時に自動再接続する
-  app.get('/__events', (c) => {
+  app.get("/__events", (c) => {
     const { broadcaster } = options;
     return streamSSE(c, async (stream) => {
       if (broadcaster === undefined) {
-        await stream.writeSSE({ event: 'disabled', data: '' });
+        await stream.writeSSE({ event: "disabled", data: "" });
         return;
       }
 
       const unsubscribe = broadcaster.subscribe((event) => {
-        void stream.writeSSE({ event: 'change', data: JSON.stringify(event) });
+        void stream.writeSSE({ event: "change", data: JSON.stringify(event) });
       });
       stream.onAbort(unsubscribe);
 
@@ -184,7 +199,7 @@ export const createApp = (options: AppOptions): Hono => {
       while (!stream.aborted && !stream.closed) {
         await stream.sleep(15_000);
         if (stream.aborted || stream.closed) break;
-        await stream.writeSSE({ event: 'ping', data: '' });
+        await stream.writeSSE({ event: "ping", data: "" });
       }
       unsubscribe();
     });
@@ -192,7 +207,7 @@ export const createApp = (options: AppOptions): Hono => {
 
   // ---- ページ ----
 
-  app.get('/', async (c) => {
+  app.get("/", async (c) => {
     if (options.entryRelPath !== null) {
       return c.redirect(`/view/${encodeURI(options.entryRelPath)}`);
     }
@@ -200,8 +215,8 @@ export const createApp = (options: AppOptions): Hono => {
     const tree = await buildTree(options.root);
     return c.html(
       renderLayout({
-        title: 'md-viewer',
-        breadcrumb: '',
+        title: "md-viewer",
+        breadcrumb: "",
         tree,
         currentRelPath: null,
         body:
@@ -212,13 +227,16 @@ export const createApp = (options: AppOptions): Hono => {
     );
   });
 
-  app.get('/view/*', async (c) => {
-    const relPath = decodeURIComponent(c.req.path.slice('/view/'.length));
+  app.get("/view/*", async (c) => {
+    const relPath = decodeURIComponent(c.req.path.slice("/view/".length));
     const tree = await buildTree(options.root);
 
     if (!isMarkdownPath(relPath)) {
       return c.html(
-        renderErrorPage({ message: `Markdown ファイルではありません: ${relPath}`, tree }),
+        renderErrorPage({
+          message: `Markdown ファイルではありません: ${relPath}`,
+          tree,
+        }),
         400,
       );
     }
@@ -227,16 +245,19 @@ export const createApp = (options: AppOptions): Hono => {
     if (!resolved.ok) {
       const { error } = resolved;
       const [status, message] =
-        error.type === 'outside-root'
-          ? ([403, `公開ルートの外へのアクセスは許可されていません: ${error.requested}`] as const)
-          : error.type === 'not-found'
+        error.type === "outside-root"
+          ? ([
+              403,
+              `公開ルートの外へのアクセスは許可されていません: ${error.requested}`,
+            ] as const)
+          : error.type === "not-found"
             ? ([404, `ファイルが見つかりません: ${error.requested}`] as const)
             : ([400, `ファイルではありません: ${error.requested}`] as const);
       return c.html(renderErrorPage({ message, tree }), status);
     }
 
     const { absPath, sizeBytes } = resolved.value;
-    const source = await readFile(absPath, 'utf8');
+    const source = await readFile(absPath, "utf8");
 
     if (sizeBytes > maxBytes) {
       return c.html(
@@ -273,24 +294,31 @@ export const createApp = (options: AppOptions): Hono => {
   });
 
   // Markdown から参照される画像などを返す
-  app.get('/assets/*', async (c) => {
-    const relPath = decodeURIComponent(c.req.path.slice('/assets/'.length));
+  app.get("/assets/*", async (c) => {
+    const relPath = decodeURIComponent(c.req.path.slice("/assets/".length));
     const resolved = await resolveWithinRoot(options.root, relPath);
     if (!resolved.ok) {
-      const forbidden = resolved.error.type === 'outside-root';
-      return c.text(forbidden ? 'Forbidden' : 'Not Found', forbidden ? 403 : 404);
+      const forbidden = resolved.error.type === "outside-root";
+      return c.text(
+        forbidden ? "Forbidden" : "Not Found",
+        forbidden ? 403 : 404,
+      );
     }
 
     const contentType =
-      CONTENT_TYPES[extname(relPath).toLowerCase()] ?? 'application/octet-stream';
+      CONTENT_TYPES[extname(relPath).toLowerCase()] ??
+      "application/octet-stream";
     const data = await readFile(resolved.value.absPath);
 
     return c.body(new Uint8Array(data), 200, {
-      'content-type': contentType,
-      'x-content-type-options': 'nosniff',
+      "content-type": contentType,
+      "x-content-type-options": "nosniff",
       // SVG は script を含みうるため、直接開かれた場合の実行を封じる
-      ...(contentType === 'image/svg+xml'
-        ? { 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'" }
+      ...(contentType === "image/svg+xml"
+        ? {
+            "content-security-policy":
+              "default-src 'none'; style-src 'unsafe-inline'",
+          }
         : {}),
     });
   });

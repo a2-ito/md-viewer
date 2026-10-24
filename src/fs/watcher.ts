@@ -1,9 +1,9 @@
-import { watch } from 'chokidar';
-import { relative, sep } from 'node:path';
-import { EXCLUDED_DIRS, isMarkdownPath } from './tree.ts';
+import { watch } from "chokidar";
+import { relative, sep } from "node:path";
+import { EXCLUDED_DIRS, isMarkdownPath } from "./tree.ts";
 
 export type ChangeEvent = {
-  readonly kind: 'add' | 'change' | 'unlink';
+  readonly kind: "add" | "change" | "unlink";
   /** root からの相対パス（区切りは / に正規化済み） */
   readonly relPath: string;
 };
@@ -15,10 +15,10 @@ export type Watcher = {
 /** ドット始まり、または除外ディレクトリを含むパスか */
 const isIgnored = (root: string, absPath: string): boolean => {
   const rel = relative(root, absPath);
-  if (rel === '') return false;
+  if (rel === "") return false;
   return rel
     .split(sep)
-    .some((segment) => segment.startsWith('.') || EXCLUDED_DIRS.has(segment));
+    .some((segment) => segment.startsWith(".") || EXCLUDED_DIRS.has(segment));
 };
 
 /**
@@ -39,10 +39,10 @@ export const watchMarkdown = (
   let timer: ReturnType<typeof setTimeout> | null = null;
   let pending: ChangeEvent | null = null;
 
-  const emit = (kind: ChangeEvent['kind'], absPath: string): void => {
+  const emit = (kind: ChangeEvent["kind"], absPath: string): void => {
     if (!isMarkdownPath(absPath)) return;
 
-    pending = { kind, relPath: relative(root, absPath).split(sep).join('/') };
+    pending = { kind, relPath: relative(root, absPath).split(sep).join("/") };
     if (timer !== null) clearTimeout(timer);
     timer = setTimeout(() => {
       const event = pending;
@@ -52,9 +52,9 @@ export const watchMarkdown = (
     }, debounceMs);
   };
 
-  watcher.on('add', (p) => emit('add', p));
-  watcher.on('change', (p) => emit('change', p));
-  watcher.on('unlink', (p) => emit('unlink', p));
+  watcher.on("add", (p) => emit("add", p));
+  watcher.on("change", (p) => emit("change", p));
+  watcher.on("unlink", (p) => emit("unlink", p));
 
   return {
     close: async () => {

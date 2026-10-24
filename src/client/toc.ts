@@ -12,7 +12,9 @@ export const setupTocHighlight = (): void => {
   observer?.disconnect();
   observer = null;
 
-  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc a[href^="#"]'));
+  const links = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>('.toc a[href^="#"]'),
+  );
   if (links.length === 0) return;
 
   const linkBySlug = new Map<string, HTMLAnchorElement>();
@@ -21,11 +23,13 @@ export const setupTocHighlight = (): void => {
   }
 
   const headings = Array.from(
-    document.querySelectorAll<HTMLElement>('.markdown-body h2[id], .markdown-body h3[id]'),
+    document.querySelectorAll<HTMLElement>(
+      ".markdown-body h2[id], .markdown-body h3[id]",
+    ),
   ).filter((heading) => linkBySlug.has(heading.id));
   if (headings.length === 0) return;
 
-  let currentSlug = '';
+  let currentSlug = "";
 
   const update = (): void => {
     // 文書順に見て、画面上端を最後に通過した見出しが現在位置
@@ -35,10 +39,10 @@ export const setupTocHighlight = (): void => {
       candidate = heading;
     }
 
-    const slug = candidate?.id ?? '';
+    const slug = candidate?.id ?? "";
     if (slug === currentSlug) return;
-    linkBySlug.get(currentSlug)?.classList.remove('is-current');
-    linkBySlug.get(slug)?.classList.add('is-current');
+    linkBySlug.get(currentSlug)?.classList.remove("is-current");
+    linkBySlug.get(slug)?.classList.add("is-current");
     currentSlug = slug;
   };
 

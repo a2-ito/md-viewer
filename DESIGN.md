@@ -5,6 +5,7 @@
 ローカルの Markdown ファイル/フォルダを、ブラウザで快適に**閲覧**するためのツール。
 
 ### スコープ内
+
 - ローカルフォルダを起点としたファイルツリー閲覧
 - Mermaid 図・数式 (KaTeX) のレンダリング
 - 目次 (TOC) 生成とスクロール追従
@@ -12,6 +13,7 @@
 - ファイル変更の自動反映（ライブリロード）
 
 ### スコープ外（明示的に作らない）
+
 - Markdown の編集・保存機能
 - 認証、マルチユーザー、クラウド同期
 - 全文検索（M7 以降の候補として保留）
@@ -29,11 +31,11 @@ $ md-viewer ./docs
 
 ### 比較検討
 
-| 方式 | 長所 | 短所 | 判定 |
-|---|---|---|---|
-| 純 Web アプリ | 配布不要、共有容易 | File System Access API が Safari 非対応。フォルダ走査・ファイル監視が実現困難 | ✗ 要件（ローカルフォルダ）を満たせない |
-| **CLI + localhost** | Web 技術をそのまま使える。fs アクセス自由。配布は npm 一本 | ターミナル起動が必要 | ✓ **採用** |
-| Tauri / Electron | ネイティブ体験、ファイル関連付け可能 | インストーラ署名・自動更新・クロスビルドのコストが機能価値を上回る | ✗ ビューワ規模には過剰 |
+| 方式                | 長所                                                       | 短所                                                                          | 判定                                   |
+| ------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------- |
+| 純 Web アプリ       | 配布不要、共有容易                                         | File System Access API が Safari 非対応。フォルダ走査・ファイル監視が実現困難 | ✗ 要件（ローカルフォルダ）を満たせない |
+| **CLI + localhost** | Web 技術をそのまま使える。fs アクセス自由。配布は npm 一本 | ターミナル起動が必要                                                          | ✓ **採用**                             |
+| Tauri / Electron    | ネイティブ体験、ファイル関連付け可能                       | インストーラ署名・自動更新・クロスビルドのコストが機能価値を上回る            | ✗ ビューワ規模には過剰                 |
 
 **採用理由**: 閲覧専用なのでファイル書き込み権限が不要 → サーバは read-only で完結し、権限設計・コンフリクト考慮が消える。CLI 起動は開発者向けツールとして許容範囲。
 
@@ -41,20 +43,21 @@ $ md-viewer ./docs
 
 ## 3. 技術スタック
 
-| 領域 | 選定 | 理由 |
-|---|---|---|
-| ランタイム | Node.js >= 20 + TypeScript | ES Module / `node:` prefix / fetch 標準搭載 |
-| CLI | `commander` | 枯れており依存が軽い |
-| HTTP サーバ | `hono` | 軽量・型安全。Node/Bun 両対応で将来の移行余地 |
-| Markdown パーサ | `markdown-it` | anchor / toc / katex 系プラグインが枯れている。remark より高速 |
-| 数式 | `@vscode/markdown-it-katex` + KaTeX | **サーバ側で HTML 化**。クライアント JS 不要 |
-| 図 | `mermaid` | **クライアント側で描画**（サーバ SVG 化は puppeteer 必須で重い） |
-| コードハイライト | `shiki` | VS Code 同エンジン。サーバ側で HTML 化するため CSS テーマ管理が不要 |
-| ファイル監視 | `chokidar` | macOS の FSEvents を含むクロスプラットフォーム対応 |
-| フロントエンド | **素の TS + CSS**（フレームワークなし） | サーバが完成 HTML を返す。JS の役割は TOC 追従・ツリー開閉・リロードのみ |
-| PDF 出力 | ブラウザの印刷機能 + `@media print` CSS | puppeteer を持ち込まずに要件充足 |
+| 領域             | 選定                                    | 理由                                                                     |
+| ---------------- | --------------------------------------- | ------------------------------------------------------------------------ |
+| ランタイム       | Node.js >= 20 + TypeScript              | ES Module / `node:` prefix / fetch 標準搭載                              |
+| CLI              | `commander`                             | 枯れており依存が軽い                                                     |
+| HTTP サーバ      | `hono`                                  | 軽量・型安全。Node/Bun 両対応で将来の移行余地                            |
+| Markdown パーサ  | `markdown-it`                           | anchor / toc / katex 系プラグインが枯れている。remark より高速           |
+| 数式             | `@vscode/markdown-it-katex` + KaTeX     | **サーバ側で HTML 化**。クライアント JS 不要                             |
+| 図               | `mermaid`                               | **クライアント側で描画**（サーバ SVG 化は puppeteer 必須で重い）         |
+| コードハイライト | `shiki`                                 | VS Code 同エンジン。サーバ側で HTML 化するため CSS テーマ管理が不要      |
+| ファイル監視     | `chokidar`                              | macOS の FSEvents を含むクロスプラットフォーム対応                       |
+| フロントエンド   | **素の TS + CSS**（フレームワークなし） | サーバが完成 HTML を返す。JS の役割は TOC 追従・ツリー開閉・リロードのみ |
+| PDF 出力         | ブラウザの印刷機能 + `@media print` CSS | puppeteer を持ち込まずに要件充足                                         |
 
 ### 意図的に採用しないもの
+
 - **React / Vite SPA**: 静的な文書表示に仮想 DOM は不要。初期表示が遅くなるだけ
 - **WebSocket**: ライブリロードは一方向通知のみ → SSE で足りる
 - **puppeteer**: PDF は印刷ダイアログに委譲。依存 200MB を回避
@@ -74,13 +77,13 @@ flowchart TD
     SRV --> CLIENT[client/ TOC追従・ツリー・リロード]
 ```
 
-| ディレクトリ | 責務 | 副作用 |
-|---|---|---|
-| `src/cli/` | 引数解析、ポート決定、ブラウザ起動 | あり |
-| `src/core/` | `render(markdown, opts) → { html, toc }` | **なし（純関数）** |
-| `src/fs/` | ディレクトリ走査、パス解決、chokidar 監視 | あり |
-| `src/server/` | HTTP ルーティング、HTML 組み立て、SSE 配信 | あり |
-| `src/client/` | ブラウザ側の最小スクリプト | あり |
+| ディレクトリ  | 責務                                       | 副作用             |
+| ------------- | ------------------------------------------ | ------------------ |
+| `src/cli/`    | 引数解析、ポート決定、ブラウザ起動         | あり               |
+| `src/core/`   | `render(markdown, opts) → { html, toc }`   | **なし（純関数）** |
+| `src/fs/`     | ディレクトリ走査、パス解決、chokidar 監視  | あり               |
+| `src/server/` | HTTP ルーティング、HTML 組み立て、SSE 配信 | あり               |
+| `src/client/` | ブラウザ側の最小スクリプト                 | あり               |
 
 **設計原則**: 変換ロジック (`core/`) を副作用ゼロの純関数に閉じ込める。これにより Markdown → HTML の全機能が I/O なしで単体テスト可能になり、`export` コマンドとサーバが同一コードを共有できる。
 
@@ -130,27 +133,27 @@ md-viewer/
 
 ```typescript
 type FileNode =
-  | { kind: 'file'; name: string; relPath: string }
-  | { kind: 'dir'; name: string; relPath: string; children: FileNode[] };
+  | { kind: "file"; name: string; relPath: string }
+  | { kind: "dir"; name: string; relPath: string; children: FileNode[] };
 
 type TocEntry = {
   readonly level: 1 | 2 | 3 | 4 | 5 | 6;
   readonly text: string;
-  readonly slug: string;   // アンカー ID
+  readonly slug: string; // アンカー ID
   readonly children: readonly TocEntry[];
 };
 
 type RenderResult = {
   readonly html: string;
   readonly toc: readonly TocEntry[];
-  readonly hasMermaid: boolean;  // client の mermaid を動的 import する判定
+  readonly hasMermaid: boolean; // client の mermaid を動的 import する判定
   readonly frontmatter: Readonly<Record<string, unknown>>;
 };
 
 type RenderError =
-  | { type: 'not-found'; relPath: string }
-  | { type: 'outside-root'; requested: string }
-  | { type: 'not-markdown'; relPath: string };
+  | { type: "not-found"; relPath: string }
+  | { type: "outside-root"; requested: string }
+  | { type: "not-markdown"; relPath: string };
 ```
 
 エラーは例外を投げずに判別可能ユニオンで返し、呼び出し側で HTTP ステータスへマッピングする。
@@ -159,15 +162,15 @@ type RenderError =
 
 ## 6. HTTP インタフェース
 
-| メソッド | パス | 応答 | 備考 |
-|---|---|---|---|
-| GET | `/` | HTML | `README.md` があればそれを表示、なければツリー |
-| GET | `/view/*` | HTML | Markdown をレンダリングして返す |
-| GET | `/api/tree` | JSON | `FileNode[]` |
-| GET | `/api/raw/*` | text/markdown | 生ソース表示用 |
-| GET | `/assets/*` | binary | Markdown からの相対参照画像 |
-| GET | `/__events` | text/event-stream | SSE（`{ type: 'change', relPath }`） |
-| GET | `/__static/*` | JS/CSS | クライアントアセット |
+| メソッド | パス          | 応答              | 備考                                           |
+| -------- | ------------- | ----------------- | ---------------------------------------------- |
+| GET      | `/`           | HTML              | `README.md` があればそれを表示、なければツリー |
+| GET      | `/view/*`     | HTML              | Markdown をレンダリングして返す                |
+| GET      | `/api/tree`   | JSON              | `FileNode[]`                                   |
+| GET      | `/api/raw/*`  | text/markdown     | 生ソース表示用                                 |
+| GET      | `/assets/*`   | binary            | Markdown からの相対参照画像                    |
+| GET      | `/__events`   | text/event-stream | SSE（`{ type: 'change', relPath }`）           |
+| GET      | `/__static/*` | JS/CSS            | クライアントアセット                           |
 
 `__` prefix は内部エンドポイントの目印。ユーザーの実ファイルと衝突しないよう予約する。
 
@@ -175,7 +178,7 @@ type RenderError =
 
 ## 7. 画面設計
 
-```
+````
 ┌────────────────────────────────────────────────────────┐
 │  md-viewer   ./docs                       [🌗] [印刷]  │
 ├──────────────┬──────────────────────────┬──────────────┤
@@ -189,7 +192,7 @@ type RenderError =
 │              │   ```                    │  ← 現在位置  │
 │  240px       │        max-width: 80ch   │      220px   │
 └──────────────┴──────────────────────────┴──────────────┘
-```
+````
 
 - **本文幅**: `max-width: 80ch` — 可読性の上限
 - **レスポンシブ**: 1200px 未満で TOC を折りたたみ、900px 未満でツリーをドロワー化
@@ -202,28 +205,32 @@ type RenderError =
 
 閲覧専用ローカルツールだが、以下は必須。
 
-| リスク | 対策 |
-|---|---|
-| 外部からのアクセス | `127.0.0.1` のみに bind（`0.0.0.0` にしない） |
-| パストラバーサル (`../../etc/passwd`) | `path.resolve` 後にルートディレクトリの接頭辞一致を検証。シンボリックリンクは `realpath` 解決後に再検証 |
-| Markdown 内の生 HTML による XSS | markdown-it の `html: false` を既定とし、`--allow-html` を指定した場合のみ許可（その場合もサニタイズを通す） |
-| 巨大ファイルによるメモリ枯渇 | ファイルサイズ上限（既定 10MB）を超えたら生テキスト表示にフォールバック |
-| DNS rebinding | `Host` ヘッダを `localhost` / `127.0.0.1` に限定して検証 |
+| リスク                                | 対策                                                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 外部からのアクセス                    | `127.0.0.1` のみに bind（`0.0.0.0` にしない）                                                                |
+| パストラバーサル (`../../etc/passwd`) | `path.resolve` 後にルートディレクトリの接頭辞一致を検証。シンボリックリンクは `realpath` 解決後に再検証      |
+| Markdown 内の生 HTML による XSS       | markdown-it の `html: false` を既定とし、`--allow-html` を指定した場合のみ許可（その場合もサニタイズを通す） |
+| 巨大ファイルによるメモリ枯渇          | ファイルサイズ上限（既定 10MB）を超えたら生テキスト表示にフォールバック                                      |
+| DNS rebinding                         | `Host` ヘッダを `localhost` / `127.0.0.1` に限定して検証                                                     |
 
 ---
 
 ## 9. PDF / HTML 出力
 
 ### PDF
+
 `@media print` CSS でツリー・TOC・ヘッダを非表示化し、ブラウザの印刷ダイアログに委譲する。
+
 - `page-break-inside: avoid` をコードブロック・表・図に適用
 - リンクの URL を `a[href]::after` で脚注として展開（印刷時のみ）
 - Mermaid は描画完了後に `window.print()` を呼ぶ（未描画のまま印刷されるのを防ぐ）
 
 ### 静的 HTML
+
 ```
 $ md-viewer export ./docs -o ./out
 ```
+
 - `core/` を再利用してサーバなしで全ファイルを変換
 - ファイル間リンク（`./setup.md`）を `./setup.html` に書き換え、階層構造は出力先にそのまま写す
 - アプリ CSS（約 7KB）は各ページに `<style>` でインライン化
@@ -234,6 +241,7 @@ $ md-viewer export ./docs -o ./out
 - 目次のスクロール追従は静的出力では省略する（リンクとしてのジャンプは動く）
 
 出力構造:
+
 ```
 out/
 ├── index.html          # README.md の複製（入口）
@@ -250,15 +258,15 @@ out/
 
 ## 10. マイルストーン
 
-| # | 内容 | 完了条件 | 状態 |
-|---|---|---|---|
-| M1 | CLI + サーバ + 単一ファイル表示 | `md-viewer foo.md` でブラウザに表示される | ✅ 完了 |
-| M2 | ファイルツリー + ルーティング | フォルダを指定してツリーから遷移できる | ✅ 完了 |
-| M3 | Mermaid + KaTeX + ハイライト | 3 種すべてが正しく描画される | ✅ 完了 |
-| M4 | TOC + スクロール追従 | 見出しジャンプと現在位置ハイライトが動く | ✅ 完了 |
-| M5 | ライブリロード | ファイル保存で自動再描画される | ✅ 完了 |
-| M6 | print CSS + `export` コマンド | PDF 出力と静的 HTML 出力が動く | ✅ 完了 |
-| M7 | （保留）全文検索 | — | 未着手 |
+| #   | 内容                            | 完了条件                                  | 状態    |
+| --- | ------------------------------- | ----------------------------------------- | ------- |
+| M1  | CLI + サーバ + 単一ファイル表示 | `md-viewer foo.md` でブラウザに表示される | ✅ 完了 |
+| M2  | ファイルツリー + ルーティング   | フォルダを指定してツリーから遷移できる    | ✅ 完了 |
+| M3  | Mermaid + KaTeX + ハイライト    | 3 種すべてが正しく描画される              | ✅ 完了 |
+| M4  | TOC + スクロール追従            | 見出しジャンプと現在位置ハイライトが動く  | ✅ 完了 |
+| M5  | ライブリロード                  | ファイル保存で自動再描画される            | ✅ 完了 |
+| M6  | print CSS + `export` コマンド   | PDF 出力と静的 HTML 出力が動く            | ✅ 完了 |
+| M7  | （保留）全文検索                | —                                         | 未着手  |
 
 M1〜M2 で「使える」状態、M4 までで「実用」、M6 で「完成」。
 
