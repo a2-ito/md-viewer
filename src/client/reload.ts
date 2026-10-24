@@ -1,8 +1,8 @@
-import { renderDiagrams } from './mermaid.ts';
-import { setupTocHighlight } from './toc.ts';
-import { setupTreeState } from './tree.ts';
+import { renderDiagrams } from "./mermaid.ts";
+import { setupTocHighlight } from "./toc.ts";
+import { setupTreeState } from "./tree.ts";
 
-const KATEX_HREF = '/__static/katex.css';
+const KATEX_HREF = "/__static/katex.css";
 
 /**
  * ペインを新しい内容に入れ替える。
@@ -30,10 +30,11 @@ const syncPane = (
 /** 数式を含むページに切り替わったときに KaTeX の CSS を足す */
 const ensureKatexCss = (next: Document): void => {
   const needed = next.querySelector(`link[href="${KATEX_HREF}"]`) !== null;
-  if (!needed || document.querySelector(`link[href="${KATEX_HREF}"]`) !== null) return;
+  if (!needed || document.querySelector(`link[href="${KATEX_HREF}"]`) !== null)
+    return;
 
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
   link.href = KATEX_HREF;
   document.head.append(link);
 };
@@ -43,18 +44,21 @@ const ensureKatexCss = (next: Document): void => {
  * ページ全体を再読み込みしないので、スクロール位置がそのまま残る。
  */
 const applyUpdate = async (): Promise<void> => {
-  const response = await fetch(location.href, { cache: 'no-store' });
-  const next = new DOMParser().parseFromString(await response.text(), 'text/html');
+  const response = await fetch(location.href, { cache: "no-store" });
+  const next = new DOMParser().parseFromString(
+    await response.text(),
+    "text/html",
+  );
 
-  const body = document.querySelector('.app-body');
+  const body = document.querySelector(".app-body");
   if (body === null) {
     location.reload();
     return;
   }
 
-  syncPane('.tree-pane', next, (el) => body.prepend(el));
-  syncPane('.markdown-body', next, (el) => body.append(el));
-  syncPane('.toc-pane', next, (el) => body.append(el));
+  syncPane(".tree-pane", next, (el) => body.prepend(el));
+  syncPane(".markdown-body", next, (el) => body.append(el));
+  syncPane(".toc-pane", next, (el) => body.append(el));
   ensureKatexCss(next);
   document.title = next.title;
 
@@ -68,10 +72,10 @@ const applyUpdate = async (): Promise<void> => {
  * EventSource は切断時に自動再接続するため、サーバ再起動にもそのまま追従する。
  */
 export const startLiveReload = (): void => {
-  const source = new EventSource('/__events');
+  const source = new EventSource("/__events");
   let updating = false;
 
-  source.addEventListener('change', () => {
+  source.addEventListener("change", () => {
     // 更新中に届いた通知は捨てる（直後に最新を取り直すので取りこぼしにならない）
     if (updating) return;
     updating = true;

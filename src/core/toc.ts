@@ -28,11 +28,11 @@ export const slugify = (text: string): string => {
   const slug = text
     .trim()
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s_-]/gu, '')
-    .replace(/\s+/g, '-')
-    .replace(/-{2,}/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return slug === '' ? 'section' : slug;
+    .replace(/[^\p{L}\p{N}\s_-]/gu, "")
+    .replace(/\s+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug === "" ? "section" : slug;
 };
 
 /**
@@ -50,7 +50,9 @@ export const createSlugger = (): ((text: string) => string) => {
 };
 
 /** 平坦な見出し列を、レベルに従って入れ子にする。 */
-export const buildTocTree = (headings: readonly FlatHeading[]): readonly TocEntry[] => {
+export const buildTocTree = (
+  headings: readonly FlatHeading[],
+): readonly TocEntry[] => {
   const roots: TocEntry[] = [];
   // 各レベルの「現在の親候補」を保持する
   const stack: Array<{ level: TocLevel; children: TocEntry[] }> = [];
@@ -59,7 +61,10 @@ export const buildTocTree = (headings: readonly FlatHeading[]): readonly TocEntr
     const children: TocEntry[] = [];
     const entry: TocEntry = { ...heading, children };
 
-    while (stack.length > 0 && (stack[stack.length - 1]?.level ?? 0) >= heading.level) {
+    while (
+      stack.length > 0 &&
+      (stack[stack.length - 1]?.level ?? 0) >= heading.level
+    ) {
       stack.pop();
     }
 

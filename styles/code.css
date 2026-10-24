@@ -4,14 +4,18 @@
   color: var(--shiki-light);
   background-color: var(--shiki-light-bg);
 }
-.markdown-body .shiki span { color: var(--shiki-light); }
+.markdown-body .shiki span {
+  color: var(--shiki-light);
+}
 
 @media (prefers-color-scheme: dark) {
   .markdown-body .shiki {
     color: var(--shiki-dark);
     background-color: var(--shiki-dark-bg);
   }
-  .markdown-body .shiki span { color: var(--shiki-dark); }
+  .markdown-body .shiki span {
+    color: var(--shiki-dark);
+  }
 }
 
 /*

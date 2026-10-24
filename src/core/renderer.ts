@@ -1,15 +1,23 @@
-import MarkdownItFactory, { type MarkdownIt, type RendererRule, type Token } from 'markdown-it';
-import katexModule from '@vscode/markdown-it-katex';
-import { escapeHtml } from './escape.ts';
-import { extractFrontmatter, readTitle, type Frontmatter } from './frontmatter.ts';
-import { isDocumentRelative } from './links.ts';
+import MarkdownItFactory, {
+  type MarkdownIt,
+  type RendererRule,
+  type Token,
+} from "markdown-it";
+import katexModule from "@vscode/markdown-it-katex";
+import { escapeHtml } from "./escape.ts";
+import {
+  extractFrontmatter,
+  readTitle,
+  type Frontmatter,
+} from "./frontmatter.ts";
+import { isDocumentRelative } from "./links.ts";
 import {
   buildTocTree,
   createSlugger,
   isTocLevel,
   type FlatHeading,
   type TocEntry,
-} from './toc.ts';
+} from "./toc.ts";
 
 export type RenderResult = {
   readonly html: string;
@@ -50,7 +58,7 @@ export type Renderer = (source: string) => RenderResult;
  */
 export type FenceHighlighter = (code: string, lang: string) => string | null;
 
-type MarkdownItPlugin = Parameters<MarkdownIt['use']>[0];
+type MarkdownItPlugin = Parameters<MarkdownIt["use"]>[0];
 
 /**
  * 1 回の render 中だけ有効な収集用の状態。
@@ -62,19 +70,19 @@ type RenderEnv = {
 };
 
 const asRenderEnv = (env: unknown): RenderEnv | null =>
-  typeof env === 'object' &&
+  typeof env === "object" &&
   env !== null &&
   Array.isArray((env as { headings?: unknown }).headings) &&
-  typeof (env as { slug?: unknown }).slug === 'function'
+  typeof (env as { slug?: unknown }).slug === "function"
     ? (env as RenderEnv)
     : null;
 
 /** 見出しの表示テキストを取り出す（強調やリンクの記法は落とす） */
 const headingText = (inline: Token | undefined): string =>
   (inline?.children ?? [])
-    .filter((child) => child.type === 'text' || child.type === 'code_inline')
+    .filter((child) => child.type === "text" || child.type === "code_inline")
     .map((child) => child.content)
-    .join('')
+    .join("")
     .trim();
 
 /**
@@ -82,33 +90,34 @@ const headingText = (inline: Token | undefined): string =>
  * `default` に一段ラップされて届く。両方の形を受け付ける。
  */
 const resolvePlugin = (mod: unknown, name: string): MarkdownItPlugin => {
-  if (typeof mod === 'function') return mod as MarkdownItPlugin;
-  if (typeof mod === 'object' && mod !== null && 'default' in mod) {
+  if (typeof mod === "function") return mod as MarkdownItPlugin;
+  if (typeof mod === "object" && mod !== null && "default" in mod) {
     const inner: unknown = (mod as { default: unknown }).default;
-    if (typeof inner === 'function') return inner as MarkdownItPlugin;
+    if (typeof inner === "function") return inner as MarkdownItPlugin;
   }
   throw new Error(`${name} のプラグイン関数を解決できませんでした`);
 };
 
-const KATEX_PLUGIN = resolvePlugin(katexModule, '@vscode/markdown-it-katex');
+const KATEX_PLUGIN = resolvePlugin(katexModule, "@vscode/markdown-it-katex");
 
 /** mermaid はハイライトせず、クライアントが描画できる形で出す */
-const MERMAID_LANGS = new Set(['mermaid']);
+const MERMAID_LANGS = new Set(["mermaid"]);
 
 const renderMermaidBlock = (code: string): string =>
   `<pre class="mermaid">${escapeHtml(code)}</pre>`;
 
 /** 指定属性がドキュメント相対なら rewrite を通す描画ルールを作る。 */
-const withRewrite = (
-  base: RendererRule,
-  attr: string,
-  rewrite: (value: string) => string,
-): RendererRule =>
+const withRewrite =
+  (
+    base: RendererRule,
+    attr: string,
+    rewrite: (value: string) => string,
+  ): RendererRule =>
   (tokens, idx, options, env, self) => {
     // attrGet は string | number | null を返すため文字列に絞る
     const value = tokens[idx]?.attrGet(attr);
     const token = tokens[idx];
-    if (token && typeof value === 'string' && isDocumentRelative(value)) {
+    if (token && typeof value === "string" && isDocumentRelative(value)) {
       token.attrSet(attr, rewrite(value));
     }
     return base(tokens, idx, options, env, self);
@@ -119,7 +128,12 @@ const withRewrite = (
  * 返される関数は I/O を持たない純関数であり、サーバと export コマンドで共有される。
  */
 export const createRenderer = (options: RendererOptions = {}): Renderer => {
-  const { allowHtml = false, rewriteHref, rewriteSrc, highlightFence } = options;
+  const {
+    allowHtml = false,
+    rewriteHref,
+    rewriteSrc,
+    highlightFence,
+  } = options;
 
   const md = new MarkdownItFactory({
     html: allowHtml,
@@ -127,7 +141,7 @@ export const createRenderer = (options: RendererOptions = {}): Renderer => {
     breaks: false,
     highlight: (code, lang) => {
       if (MERMAID_LANGS.has(lang)) return renderMermaidBlock(code);
-      return highlightFence?.(code, lang) ?? '';
+      return highlightFence?.(code, lang) ?? "";
     },
   });
 
@@ -141,7 +155,7 @@ export const createRenderer = (options: RendererOptions = {}): Renderer => {
     if (token !== undefined && renderEnv !== null) {
       const text = headingText(tokens[idx + 1]);
       const slug = renderEnv.slug(text);
-      token.attrSet('id', slug);
+      token.attrSet("id", slug);
 
       const level = Number(token.tag.slice(1));
       if (isTocLevel(level)) {
@@ -149,7 +163,11 @@ export const createRenderer = (options: RendererOptions = {}): Renderer => {
       }
     }
     return (baseHeadingOpen ?? ((t, i, o) => self.renderToken(t, i, o)))(
-      tokens, idx, opts, env, self,
+      tokens,
+      idx,
+      opts,
+      env,
+      self,
     );
   };
 
@@ -159,7 +177,7 @@ export const createRenderer = (options: RendererOptions = {}): Renderer => {
   if (rewriteHref) {
     md.renderer.rules.link_open = withRewrite(
       md.renderer.rules.link_open ?? passthrough,
-      'href',
+      "href",
       rewriteHref,
     );
   }
@@ -167,7 +185,7 @@ export const createRenderer = (options: RendererOptions = {}): Renderer => {
   if (rewriteSrc) {
     md.renderer.rules.image = withRewrite(
       md.renderer.rules.image ?? passthrough,
-      'src',
+      "src",
       rewriteSrc,
     );
   }
@@ -179,8 +197,11 @@ export const createRenderer = (options: RendererOptions = {}): Renderer => {
     const rendered = md.render(body, env);
 
     // frontmatter に title があり、本文が h1 で始まらないときだけ見出しを補う
-    const needsHeading = title !== null && !rendered.trimStart().startsWith('<h1');
-    const html = needsHeading ? `<h1>${escapeHtml(title)}</h1>\n${rendered}` : rendered;
+    const needsHeading =
+      title !== null && !rendered.trimStart().startsWith("<h1");
+    const html = needsHeading
+      ? `<h1>${escapeHtml(title)}</h1>\n${rendered}`
+      : rendered;
 
     return {
       html,

@@ -10,7 +10,9 @@
   --error-bg: #ffebe9;
   --error-border: #cf222e;
   --header-h: 48px;
-  --font-ui: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --font-ui:
+    -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP",
+    sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
 }
 
@@ -29,7 +31,9 @@
   }
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -52,8 +56,15 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.app-name { font-weight: 600; font-size: 14px; }
-.app-path { color: var(--fg-muted); font-size: 13px; font-family: var(--font-mono); }
+.app-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+.app-path {
+  color: var(--fg-muted);
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
 .app-print {
   margin-left: auto;
   padding: 4px 12px;
@@ -65,7 +76,9 @@ body {
   border-radius: 6px;
   cursor: pointer;
 }
-.app-print:hover { background: var(--code-bg); }
+.app-print:hover {
+  background: var(--code-bg);
+}
 
 .notice {
   padding: 12px 16px;
@@ -75,7 +88,10 @@ body {
   border-radius: 6px;
   font-size: 14px;
 }
-.notice-error { background: var(--error-bg); border-color: var(--error-border); }
+.notice-error {
+  background: var(--error-bg);
+  border-color: var(--error-border);
+}
 
 pre.raw {
   padding: 16px;
@@ -104,9 +120,14 @@ pre.raw {
   font-size: 13px;
 }
 
-.tree-pane .markdown-body { padding: 0; }
+.tree-pane .markdown-body {
+  padding: 0;
+}
 
-.app-body > .markdown-body { flex: 1 1 auto; min-width: 0; }
+.app-body > .markdown-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 /* ---- ファイルツリー ---- */
 
@@ -116,7 +137,9 @@ pre.raw {
   list-style: none;
 }
 
-.tree .tree { padding-left: 14px; }
+.tree .tree {
+  padding-left: 14px;
+}
 
 .tree-dir > details > summary {
   padding: 3px 6px;
@@ -125,8 +148,13 @@ pre.raw {
   cursor: pointer;
   white-space: nowrap;
 }
-.tree-dir > details > summary:hover { background: var(--code-bg); color: var(--fg); }
-.tree-dir > details > summary::marker { color: var(--fg-muted); }
+.tree-dir > details > summary:hover {
+  background: var(--code-bg);
+  color: var(--fg);
+}
+.tree-dir > details > summary::marker {
+  color: var(--fg-muted);
+}
 
 .tree-file {
   display: block;
@@ -138,7 +166,9 @@ pre.raw {
   white-space: nowrap;
   border-radius: 6px;
 }
-.tree-file:hover { background: var(--code-bg); }
+.tree-file:hover {
+  background: var(--code-bg);
+}
 .tree-file.is-current {
   background: var(--accent);
   color: #fff;
@@ -147,7 +177,9 @@ pre.raw {
 
 /* 画面が狭いときはツリーを本文の上に積む */
 @media (max-width: 900px) {
-  .app-body { display: block; }
+  .app-body {
+    display: block;
+  }
   .tree-pane {
     position: static;
     height: auto;
@@ -176,7 +208,7 @@ pre.raw {
   color: var(--fg-muted);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: .08em;
+  letter-spacing: 0.08em;
 }
 
 .toc {
@@ -185,7 +217,9 @@ pre.raw {
   list-style: none;
 }
 
-.toc .toc { padding-left: 12px; }
+.toc .toc {
+  padding-left: 12px;
+}
 
 .toc a {
   display: block;
@@ -197,7 +231,9 @@ pre.raw {
   white-space: nowrap;
   border-left: 2px solid transparent;
 }
-.toc a:hover { color: var(--fg); }
+.toc a:hover {
+  color: var(--fg);
+}
 
 .toc a.is-current {
   color: var(--accent);
@@ -205,9 +241,13 @@ pre.raw {
   font-weight: 600;
 }
 
-.toc-l3 > a { font-size: 12px; }
+.toc-l3 > a {
+  font-size: 12px;
+}
 
 /* 目次は本文より優先度が低いので、狭い画面では落とす */
 @media (max-width: 1200px) {
-  .toc-pane { display: none; }
+  .toc-pane {
+    display: none;
+  }
 }

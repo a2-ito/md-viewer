@@ -1,4 +1,4 @@
-import { load } from 'js-yaml';
+import { load } from "js-yaml";
 
 export type Frontmatter = Readonly<Record<string, unknown>>;
 
@@ -12,10 +12,11 @@ export type FrontmatterResult = {
 };
 
 /** 先頭の `---` 区切りブロックと、それに続く本文を切り出す */
-const FRONTMATTER_PATTERN = /^---\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/;
+const FRONTMATTER_PATTERN =
+  /^---\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/;
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 /**
  * YAML frontmatter を抽出する。
@@ -27,11 +28,11 @@ export const extractFrontmatter = (source: string): FrontmatterResult => {
     return { data: {}, body: source, warnings: [] };
   }
 
-  const [matched, yaml = ''] = match;
+  const [matched, yaml = ""] = match;
   const body = source.slice(matched.length);
 
   // js-yaml は空入力に対して例外を投げるため、先に空を弾く
-  if (yaml.trim() === '') {
+  if (yaml.trim() === "") {
     return { data: {}, body, warnings: [] };
   }
 
@@ -39,7 +40,8 @@ export const extractFrontmatter = (source: string): FrontmatterResult => {
   try {
     parsed = load(yaml);
   } catch (cause) {
-    const reason = cause instanceof Error ? cause.message.split('\n')[0] : String(cause);
+    const reason =
+      cause instanceof Error ? cause.message.split("\n")[0] : String(cause);
     return {
       data: {},
       body,
@@ -56,7 +58,7 @@ export const extractFrontmatter = (source: string): FrontmatterResult => {
     return {
       data: {},
       body,
-      warnings: ['frontmatter がマッピング形式ではないため無視しました。'],
+      warnings: ["frontmatter がマッピング形式ではないため無視しました。"],
     };
   }
 
@@ -65,6 +67,6 @@ export const extractFrontmatter = (source: string): FrontmatterResult => {
 
 /** frontmatter から表示用タイトルを取り出す。文字列でなければ null。 */
 export const readTitle = (data: Frontmatter): string | null => {
-  const title = data['title'];
-  return typeof title === 'string' && title.trim() !== '' ? title.trim() : null;
+  const title = data["title"];
+  return typeof title === "string" && title.trim() !== "" ? title.trim() : null;
 };
