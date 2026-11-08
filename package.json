@@ -38,6 +38,9 @@
     "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   },
+  "overrides": {
+    "katex": "$katex"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/a2-ito/md-viewer.git"
